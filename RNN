@@ -2,7 +2,7 @@
 # @Author : Liang Zhang
 # @Email : zl16035056@163.com
 # @File : rnn.py
-# @Lab : Jianpu Wang Optoelectronic Materials and Devices Group
+
 
 import torch
 import torch.nn as nn
