@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+# @Author : Liang Zhang
+# @Email : zl16035056@163.com
+# @File : rnn.py
+# @Lab : Jianpu Wang Optoelectronic Materials and Devices Group
+
+import torch
+import torch.nn as nn
+from einops import rearrange
+
+
+class RNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, depth):
+        super(RNN, self).__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.depth = depth
+
+        self.W_ih = nn.Linear(input_dim, hidden_dim)
+        self.W_hh = nn.Linear(hidden_dim, hidden_dim)
+        self.bias_ih = nn.Parameter(torch.rand(hidden_dim))
+        self.bias_hh = nn.Parameter(torch.zeros(hidden_dim))
+
+    def RNN(self, x, h):
+        x_t = self.W_ih(x) + self.bias_ih
+        h_hid = self.W_hh(h) + self.bias_hh
+        output = torch.tanh(x_t + h_hid)
+        return output, h_hid
+
+    def forward(self, x):
+        h = torch.zeros(x.size(0), x.size(1), self.hidden_dim)
+        for i in range(self.depth):
+            output, h = self.RNN(x, h)
+        return output
+
+
+rnn = RNN(10, 5, 2)
+input = torch.randn(5, 3, 10)
+output = rnn(input)
+print(output)
