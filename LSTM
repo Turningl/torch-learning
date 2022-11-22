@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+# @Author : Liang Zhang
+# @Email : zl16035056@163.com
+# @File : lstm.py
+# @Lab : Jianpu Wang Optoelectronic Materials and Devices Group
+
+
+import torch
+import torch.nn as nn
+
+
+class LSTM(nn.Module):
+    def __init__(self, input_dim, hidden_dim, depth):
+        super(LSTM, self).__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.depth = depth
+        self.W_f = nn.Sequential(nn.Linear(input_dim + hidden_dim, hidden_dim), nn.Sigmoid())
+        self.W_i = nn.Sequential(nn.Linear(input_dim + hidden_dim, hidden_dim), nn.Sigmoid())
+        self.W_o = nn.Sequential(nn.Linear(input_dim + hidden_dim, hidden_dim), nn.Sigmoid())
+        self.W = nn.Sequential(nn.Linear(input_dim + hidden_dim, hidden_dim), nn.Tanh())
+
+    def LSTM(self, x, h, c):
+        f = self.W_f(torch.cat([x, h], dim=-1))
+        i = self.W_i(torch.cat([x, h], dim=-1))
+        o = self.W_o(torch.cat([x, h], dim=-1))
+        c_hid_t = self.W(torch.cat([x, h], dim=-1))
+        c_t = f * c + i * c_hid_t
+        h_t = o * torch.tanh(c_t)
+        return h_t, c_t
+
+    def forward(self, x, h, c):
+        for i in range(self.depth):
+            h, c = self.LSTM(x, h, c)
+        return c, h
+
+
+if __name__ == '__main__':
+    rnn = LSTM(10, 5, 2)
+    input = torch.randn(5, 3, 10)
+    h = torch.zeros(input.size(0), input.size(1), 5)
+    c = torch.zeros(input.size(0), input.size(1), 5)
+    h_sum, c_sum = rnn(input, h, c)
+    print(h_sum, c_sum)
