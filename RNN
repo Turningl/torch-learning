@@ -34,7 +34,8 @@ class RNN(nn.Module):
         return output
 
 
-rnn = RNN(10, 5, 2)
-input = torch.randn(5, 3, 10)
-output = rnn(input)
-print(output)
+if __name__ == '__main__':
+    rnn = RNN(10, 5, 2)
+    input = torch.randn(5, 3, 10)
+    output = rnn(input)
+    print(output)
