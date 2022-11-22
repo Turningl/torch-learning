@@ -18,17 +18,17 @@ class RNN(nn.Module):
 
         self.W_ih = nn.Linear(input_dim, hidden_dim)
         self.W_hh = nn.Linear(hidden_dim, hidden_dim)
+        self.W_th = nn.Linear(hidden_dim, hidden_dim)
         self.bias_ih = nn.Parameter(torch.rand(hidden_dim))
         self.bias_hh = nn.Parameter(torch.zeros(hidden_dim))
 
     def RNN(self, x, h):
         x_t = self.W_ih(x) + self.bias_ih
         h_hid = self.W_hh(h) + self.bias_hh
-        output = torch.tanh(x_t + h_hid)
+        output = torch.tanh(self.W_th(x_t + h_hid))
         return output, h_hid
 
-    def forward(self, x):
-        h = torch.zeros(x.size(0), x.size(1), self.hidden_dim)
+    def forward(self, x, h):
         for i in range(self.depth):
             output, h = self.RNN(x, h)
         return output
@@ -37,5 +37,6 @@ class RNN(nn.Module):
 if __name__ == '__main__':
     rnn = RNN(10, 5, 2)
     input = torch.randn(5, 3, 10)
+    h = torch.zeros(input.size(0), input.size(1), 5)
     output = rnn(input)
     print(output)
