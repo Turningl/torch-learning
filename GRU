@@ -1,0 +1,39 @@
+# -*- coding: utf-8 -*-
+# @Author : Liang Zhang
+# @Email : zl16035056@163.com
+# @File : gru.py
+
+
+import torch
+import torch.nn as nn
+
+
+class GRU(nn.Module):
+    def __init__(self, input_dim, hidden_dim, depth):
+        super(GRU, self).__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.depth = depth
+        self.W_r = nn.Sequential(nn.Linear(input_dim+hidden_dim, hidden_dim), nn.Sigmoid())
+        self.W_z = nn.Sequential(nn.Linear(input_dim+hidden_dim, hidden_dim), nn.Sigmoid())
+        self.W = nn.Sequential(nn.Linear(input_dim+hidden_dim, hidden_dim), nn.Tanh())
+
+    def GRU(self, x, h):
+        r = self.W_r(torch.cat([x, h], dim=-1))
+        z = self.W_z(torch.cat([x, h], dim=-1))
+        h_hid_t = self.W(torch.cat([x, r*h], dim=-1))
+        h_t = (1 - z) * h + z * h_hid_t
+        return h_t
+
+    def forward(self, x, h):
+        for i in range(self.depth):
+            h = self.GRU(x, h)
+        return h
+
+
+if __name__ == '__main__':
+    rnn = GRU(10, 5, 2)
+    input = torch.randn(5, 3, 10)
+    h = torch.zeros(input.size(0), input.size(1), 5)
+    h_sum = rnn(input, h)
+    print(h_sum)
